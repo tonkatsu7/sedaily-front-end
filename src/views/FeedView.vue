@@ -1,6 +1,16 @@
 
 <template>
   <div>
+    <modal v-if="showModal">
+      <span slot="header">Sign up for a personalized feed</span>
+      <span slot="body">
+        <router-link to="/login">Log in</router-link> or <router-link to="/register">register</router-link>.
+      </span>
+      <button slot="footer" class="modal-default-button btn btn-secondary" @click="closeModal">
+        I'll do it later
+      </button>
+    </modal>
+
     <h1> Feed </h1>
 
     <div class="feed-list">
@@ -11,21 +21,25 @@
 
 <script>
 import FeedItem from '@/components/FeedItem.vue'
-import { mapActions, mapState } from 'vuex'
+import Modal from '@/components/Modal.vue'
+import { mapActions, mapState, mapGetters } from 'vuex'
 export default {
   name: 'feed-view',
 
   components: {
-    FeedItem
+    FeedItem,
+    Modal
   },
 
   data () {
     return {
-      loading: true
+      loading: true,
+      showModal: false
     }
   },
 
   beforeMount () {
+    this.showModal = !this.isLoggedIn
     // You probably only need finally instead of both then and catch
     this.fetchMyProfileData()
       .then(() => {
@@ -44,10 +58,14 @@ export default {
       })
   },
   methods: {
+    closeModal: function () {
+      this.showModal = false
+    },
     ...mapActions(['fetchMyProfileData', 'fetchMyFeed'])
   },
 
   computed: {
+    ...mapGetters(['isLoggedIn']),
     ...mapState({
       me (state) {
         return state.me
